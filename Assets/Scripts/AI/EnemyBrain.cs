@@ -49,6 +49,7 @@ public class EnemyBrain : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         currentHealth = maxHealth;
         homePosition = transform.position;
+        agent.stoppingDistance = attackRange * 0.8f;
     }
 
     protected virtual void Start()
@@ -69,6 +70,14 @@ public class EnemyBrain : MonoBehaviour
             case EnemyState.Combat: UpdateCombat(); break;
             case EnemyState.Flee: UpdateFlee(); break;
         }
+
+        UpdateAnimator();
+    }
+
+    protected void UpdateAnimator()
+    {
+        if (animator == null) return;
+        animator.SetFloat("speed", agent.velocity.magnitude / runSpeed);
     }
 
     public void SetState(EnemyState newState)
@@ -114,7 +123,7 @@ public class EnemyBrain : MonoBehaviour
         if (target != null)
         {
             float dist = Vector3.Distance(transform.position, target.position);
-            if (dist <= detectionRange && IsTargetInFOV())
+            if (dist <= detectionRange)
             {
                 SetState(EnemyState.Alert);
                 return;
@@ -129,7 +138,7 @@ public class EnemyBrain : MonoBehaviour
         if (target != null)
         {
             float dist = Vector3.Distance(transform.position, target.position);
-            if (dist <= detectionRange && IsTargetInFOV())
+            if (dist <= detectionRange)
             {
                 SetState(EnemyState.Alert);
                 return;
@@ -250,6 +259,9 @@ public class EnemyBrain : MonoBehaviour
     {
         if (target == null) return;
 
+        if (animator != null)
+            animator.SetTrigger("attack");
+
         IHittable hittable = target.GetComponent<IHittable>();
         if (hittable != null)
             hittable.TakeDamage(damage);
@@ -258,6 +270,9 @@ public class EnemyBrain : MonoBehaviour
     public virtual void TakeDamage(float amount)
     {
         currentHealth -= amount;
+
+        if (animator != null)
+            animator.SetTrigger("hit");
 
         if (currentHealth <= 0f)
         {
@@ -274,6 +289,8 @@ public class EnemyBrain : MonoBehaviour
         SetState(EnemyState.Dead);
         agent.isStopped = true;
         agent.enabled = false;
+        if (animator != null)
+            animator.SetBool("dead", true);
         enabled = false;
     }
 }
