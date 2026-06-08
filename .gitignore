@@ -1,0 +1,31 @@
+# Unity generated
+Library/
+Logs/
+Temp/
+UserSettings/
+*.csproj
+*.sln
+*.user
+*.userprefs
+*.booproj
+sysinfo.txt
+
+# Root-level junk
+/models/
+/samples/
+/unity-mcp-server/
+/opencode.json
+
+# Redundant model source artifacts (FBX is the Unity import source)
+*.blend
+*.blend.meta
+*.obj
+*.obj.meta
+*.mtl
+*.mtl.meta
+*.tar.gz
+*.tar.gz.meta
+
+# OS
+.DS_Store
+Thumbs.db
