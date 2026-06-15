@@ -41,6 +41,14 @@ public class MainMenu : MonoBehaviour
 
         if (optionsPanel != null)
             optionsPanel.SetActive(false);
+
+        var subtitle = GameObject.Find("SubtitleText")?.GetComponent<RectTransform>();
+        if (subtitle != null)
+        {
+            var pos = subtitle.anchoredPosition;
+            pos.y -= 20f;
+            subtitle.anchoredPosition = pos;
+        }
     }
 
     private void OnStartClicked()

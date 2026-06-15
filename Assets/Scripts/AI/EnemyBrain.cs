@@ -13,6 +13,12 @@ public class EnemyBrain : MonoBehaviour
     public float attackRange = 2f;
     public float attackCooldown = 1.5f;
 
+    [Header("Level Scaling")]
+    public bool scaleWithPlayerLevel = false;
+    public float healthPerLevel = 10f;
+    public float damagePerLevel = 2f;
+    public float xpPerLevel = 5f;
+
     [Header("Detection")]
     public float detectionRange = 20f;
     public float fovAngle = 90f;
@@ -36,6 +42,11 @@ public class EnemyBrain : MonoBehaviour
     public LootDropper lootDropper;
     public int xpReward = 25;
 
+    [Header("Tint")]
+    public bool autoApplyTint = true;
+
+    public System.Action OnDied;
+
     public EnemyState CurrentState { get; private set; } = EnemyState.Idle;
 
     protected NavMeshAgent agent;
@@ -51,8 +62,41 @@ public class EnemyBrain : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponentInChildren<Animator>();
-        currentHealth = maxHealth;
         homePosition = transform.position;
+    }
+
+    protected virtual void InitializeStats()
+    {
+        if (scaleWithPlayerLevel)
+        {
+            var player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                var cl = player.GetComponent<CharacterLevel>();
+                if (cl != null)
+                {
+                    int level = cl.Level.Value;
+                    maxHealth += healthPerLevel * (level - 1);
+                    damage += damagePerLevel * (level - 1);
+                    xpReward += Mathf.RoundToInt(xpPerLevel * (level - 1));
+                }
+            }
+        }
+        currentHealth = maxHealth;
+        if (autoApplyTint)
+        {
+            var tint = GetComponent<EnemyTint>();
+            if (tint != null)
+            {
+                var player = GameObject.FindGameObjectWithTag("Player");
+                if (player != null)
+                {
+                    var cl = player.GetComponent<CharacterLevel>();
+                    if (cl != null)
+                        tint.ApplyTint(cl.Level.Value);
+                }
+            }
+        }
     }
 
     protected virtual void Start()
@@ -64,6 +108,7 @@ public class EnemyBrain : MonoBehaviour
             if (NavMesh.SamplePosition(transform.position, out hit, 10f, NavMesh.AllAreas))
                 agent.Warp(hit.position);
         }
+        InitializeStats();
         SetState(EnemyState.Idle);
     }
 
@@ -326,6 +371,7 @@ public class EnemyBrain : MonoBehaviour
 
         SpawnLoot();
         GrantXPToKiller();
+        OnDied?.Invoke();
 
         enabled = false;
     }

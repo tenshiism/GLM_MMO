@@ -56,6 +56,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (UIBlocker.IsOpen) return;
+
         HandleMouseLook();
         HandleMovement();
         HandleCombat();

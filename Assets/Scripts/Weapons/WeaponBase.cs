@@ -14,13 +14,13 @@ public class WeaponBase : MonoBehaviour
     public float chargeTime;
     public float maxChargeMultiplier = 2f;
 
-    private float fireCooldown;
-    private bool isReloading;
+    protected float fireCooldown;
+    protected bool isReloading;
     private float reloadTimer;
 
     public bool CanFire => currentAmmo > 0 && fireCooldown <= 0f && !isReloading;
     public bool IsReloading => isReloading;
-    public bool IsCharging { get; private set; }
+    public bool IsCharging { get; protected set; }
     public int MaxAmmo => definition != null ? definition.magazineSize : 0;
     public float ReloadProgress => isReloading ? 1f - (reloadTimer / definition.reloadTime) : 1f;
     public float ChargeProgress => IsCharging ? Mathf.Clamp01(chargeTime / 1.5f) : 0f;

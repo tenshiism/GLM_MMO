@@ -10,6 +10,11 @@ public class DinoSpawner : MonoBehaviour
     public bool spawnOnStart = true;
     public bool respawnEnabled = true;
 
+    [Header("Level Scaling")]
+    public bool scaleSpawns = true;
+    public float healthPerLevel = 10f;
+    public float damagePerLevel = 2f;
+
     private readonly List<GameObject> spawned = new List<GameObject>();
     private float nextSpawnTime;
 
@@ -47,7 +52,43 @@ public class DinoSpawner : MonoBehaviour
         GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Count)];
         Vector3 pos = GetValidSpawnPosition();
         var go = Instantiate(prefab, pos, Quaternion.identity);
+
+        if (scaleSpawns)
+            ApplyScaling(go);
+
+        ApplyTint(go);
+
         spawned.Add(go);
+    }
+
+    private void ApplyScaling(GameObject enemy)
+    {
+        var brain = enemy.GetComponent<EnemyBrain>();
+        if (brain == null) return;
+
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return;
+
+        var cl = player.GetComponent<CharacterLevel>();
+        if (cl == null) return;
+
+        int level = cl.Level.Value;
+        brain.maxHealth += healthPerLevel * (level - 1);
+        brain.damage += damagePerLevel * (level - 1);
+    }
+
+    private void ApplyTint(GameObject enemy)
+    {
+        var tint = enemy.GetComponent<EnemyTint>();
+        if (tint == null) return;
+
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return;
+
+        var cl = player.GetComponent<CharacterLevel>();
+        if (cl == null) return;
+
+        tint.ApplyTint(cl.Level.Value);
     }
 
     private Vector3 GetValidSpawnPosition()

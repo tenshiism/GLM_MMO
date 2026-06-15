@@ -20,11 +20,13 @@ public class QuestBoard : Interactable
         showUI = !showUI;
         if (showUI)
         {
+            UIBlocker.Open();
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
         else
         {
+            UIBlocker.Close();
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
@@ -105,6 +107,7 @@ public class QuestBoard : Interactable
     private void CloseUI()
     {
         showUI = false;
+        UIBlocker.Close();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -113,6 +116,7 @@ public class QuestBoard : Interactable
     {
         if (showUI)
         {
+            UIBlocker.Close();
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
