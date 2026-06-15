@@ -53,16 +53,42 @@ public class EnemyBrain : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         currentHealth = maxHealth;
         homePosition = transform.position;
-        agent.stoppingDistance = attackRange * 0.8f;
     }
 
     protected virtual void Start()
     {
+        agent.stoppingDistance = attackRange * 0.8f;
+        if (!agent.isOnNavMesh)
+        {
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(transform.position, out hit, 10f, NavMesh.AllAreas))
+                agent.Warp(hit.position);
+        }
         SetState(EnemyState.Idle);
+    }
+
+    protected bool HasNavMesh
+    {
+        get
+        {
+            if (agent == null || !agent.isActiveAndEnabled) return false;
+            try
+            {
+                if (agent.isOnNavMesh) return true;
+                NavMeshHit hit;
+                return NavMesh.SamplePosition(transform.position, out hit, 5f, NavMesh.AllAreas);
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 
     protected virtual void Update()
     {
+        if (!HasNavMesh) return;
+
         stateTimer -= Time.deltaTime;
         attackTimer -= Time.deltaTime;
 
@@ -90,6 +116,8 @@ public class EnemyBrain : MonoBehaviour
 
         CurrentState = newState;
         stateTimer = 0f;
+
+        if (!HasNavMesh) return;
 
         switch (newState)
         {
@@ -149,7 +177,7 @@ public class EnemyBrain : MonoBehaviour
             }
         }
 
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.5f)
+        if (!agent.pathPending && agent.isOnNavMesh && agent.remainingDistance <= agent.stoppingDistance + 0.5f)
             SetState(EnemyState.Idle);
     }
 
@@ -212,7 +240,7 @@ public class EnemyBrain : MonoBehaviour
 
     protected virtual void UpdateFlee()
     {
-        if (agent.pathPending || agent.remainingDistance > 1f) return;
+        if (agent.pathPending || !agent.isOnNavMesh || agent.remainingDistance > 1f) return;
 
         target = FindTarget();
         float dist = target != null ? Vector3.Distance(transform.position, target.position) : 100f;

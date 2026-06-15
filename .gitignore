@@ -26,6 +26,12 @@ sysinfo.txt
 *.tar.gz
 *.tar.gz.meta
 
+# Music source copies (originals in ../music/)
+Assets/Audio/
+
+# Screenshots
+Assets/Screenshots*
+
 # OS
 .DS_Store
 Thumbs.db

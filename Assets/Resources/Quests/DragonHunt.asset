@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cfb6bca43674af40b574836c15d37b4, type: 3}
+  m_Name: DragonHunt
+  m_EditorClassIdentifier: 
+  questName: Dragon Hunt
+  description: Hunt down the dragons terrorizing the ridge.
+  questType: 0
+  minLevel: 1
+  maxPlayers: 4
+  targetScene: SampleScene
+  killTarget: 3
+  collectItemId: 
+  collectCount: 0
+  xpReward: 200
+  creditReward: 400
+  guaranteedRewards: []
+  bonusLootTable: {fileID: 0}

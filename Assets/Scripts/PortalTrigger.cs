@@ -12,6 +12,11 @@ public class PortalTrigger : MonoBehaviour
             return;
         }
 
-        SceneLoader.LoadHuntingGround();
+        string targetScene = QuestManager.Instance.ActiveQuest.targetScene;
+        if (string.IsNullOrEmpty(targetScene))
+            targetScene = "SampleScene";
+
+        Debug.Log($"Portal: Loading {targetScene} for quest: {QuestManager.Instance.ActiveQuest.questName}");
+        SceneLoader.LoadScene(targetScene);
     }
 }

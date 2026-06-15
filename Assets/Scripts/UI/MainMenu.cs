@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 
 public class MainMenu : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class MainMenu : MonoBehaviour
     {
         if (FindObjectOfType<EventSystem>() == null)
         {
-            new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+            new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         }
     }
 
