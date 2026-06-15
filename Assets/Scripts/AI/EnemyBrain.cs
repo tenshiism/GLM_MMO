@@ -32,6 +32,10 @@ public class EnemyBrain : MonoBehaviour
     public float retreatDistance = 5f;
     public float strafeInterval = 2f;
 
+    [Header("Loot & XP")]
+    public LootDropper lootDropper;
+    public int xpReward = 25;
+
     public EnemyState CurrentState { get; private set; } = EnemyState.Idle;
 
     protected NavMeshAgent agent;
@@ -291,6 +295,25 @@ public class EnemyBrain : MonoBehaviour
         agent.enabled = false;
         if (animator != null)
             animator.SetBool("dead", true);
+
+        SpawnLoot();
+        GrantXPToKiller();
+
         enabled = false;
+    }
+
+    protected virtual void SpawnLoot()
+    {
+        if (lootDropper != null)
+            lootDropper.SpawnLoot(transform.position);
+    }
+
+    protected virtual void GrantXPToKiller()
+    {
+        if (target == null) return;
+
+        var level = target.GetComponent<CharacterLevel>();
+        if (level != null)
+            level.AddXP(xpReward);
     }
 }

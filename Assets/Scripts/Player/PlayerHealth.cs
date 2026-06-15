@@ -1,25 +1,70 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class PlayerHealth : MonoBehaviour, IHittable
+[RequireComponent(typeof(PlayerStats))]
+public class PlayerHealth : NetworkBehaviour, IHittable
 {
-    public float maxHealth = 100f;
-    public float currentHealth;
+    [Header("Regen")]
+    public float regenDelay = 5f;
+    public float regenRate = 2f;
+
+    public NetworkVariable<float> CurrentHealth = new NetworkVariable<float>(100f);
+    public System.Action OnDied;
+    public System.Action<float> OnHealthChanged;
+
+    private PlayerStats stats;
+    private float lastDamageTime;
 
     private void Awake()
     {
-        currentHealth = maxHealth;
+        stats = GetComponent<PlayerStats>();
+    }
+
+    private void Start()
+    {
+        if (!IsSpawned)
+            CurrentHealth.Value = stats.MaxHealth;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+            CurrentHealth.Value = stats.MaxHealth;
+    }
+
+    private void Update()
+    {
+        if (CurrentHealth.Value <= 0f) return;
+
+        if (Time.time - lastDamageTime > regenDelay && CurrentHealth.Value < stats.MaxHealth)
+        {
+            CurrentHealth.Value = Mathf.Min(CurrentHealth.Value + regenRate * Time.deltaTime, stats.MaxHealth);
+            OnHealthChanged?.Invoke(CurrentHealth.Value);
+        }
     }
 
     public void TakeDamage(float amount)
     {
-        currentHealth -= amount;
-        if (currentHealth <= 0f) Die();
+        CurrentHealth.Value -= amount;
+        lastDamageTime = Time.time;
+        OnHealthChanged?.Invoke(CurrentHealth.Value);
+
+        if (CurrentHealth.Value <= 0f)
+            Die();
     }
 
     public void OnHit(Vector3 hitPoint, Vector3 hitDirection) { }
 
+    public void Heal(float amount)
+    {
+        CurrentHealth.Value = Mathf.Min(CurrentHealth.Value + amount, stats.MaxHealth);
+        OnHealthChanged?.Invoke(CurrentHealth.Value);
+    }
+
     private void Die()
     {
+        CurrentHealth.Value = 0f;
+        OnDied?.Invoke();
         gameObject.SetActive(false);
     }
 }

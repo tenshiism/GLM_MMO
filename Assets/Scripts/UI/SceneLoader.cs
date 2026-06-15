@@ -10,12 +10,17 @@ public static class SceneLoader
 
     public static void LoadGame()
     {
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("HubZone");
     }
 
     public static void LoadMenu()
     {
         SceneManager.LoadScene("MainMenu");
+    }
+
+    public static void LoadHuntingGround()
+    {
+        SceneManager.LoadScene("SampleScene");
     }
 
     public static void QuitGame()

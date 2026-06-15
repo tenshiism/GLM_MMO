@@ -888,6 +888,7 @@ GameObject:
   - component: {fileID: 6921956434403694291}
   - component: {fileID: 1503900101783437849}
   - component: {fileID: 3296120938806369773}
+  - component: {fileID: -3378722064326771157}
   m_Layer: 9
   m_Name: BatEnemy
   m_TagString: Enemy
@@ -1007,6 +1008,24 @@ MonoBehaviour:
   fleeDistance: 30
   retreatDistance: 5
   strafeInterval: 2
+  lootDropper: {fileID: 0}
+  xpReward: 25
+--- !u!114 &-3378722064326771157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6464043583171996427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b58b433774042394ea48913c22c4a025, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lootTable: {fileID: 11400000, guid: d260ab85399481e4cabe8be5d76f03cf, type: 2}
+  pickupPrefab: {fileID: 8245987221241284347, guid: 1042c9ac86687cd4fa92f9adf94ef7fb, type: 3}
+  spreadRadius: 1.5
+  xpReward: 25
 --- !u!1 &6581347887353452470
 GameObject:
   m_ObjectHideFlags: 0

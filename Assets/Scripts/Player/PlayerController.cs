@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
     private Camera playerCamera;
     private Vector3 velocity;
     private float xRotation;
+    private WeaponManager weaponManager;
+    private PlayerStats playerStats;
 
     private void Awake()
     {
@@ -20,6 +22,9 @@ public class PlayerController : MonoBehaviour
         playerCamera = GetComponentInChildren<Camera>();
         if (playerCamera == null)
             playerCamera = Camera.main;
+
+        weaponManager = GetComponent<WeaponManager>();
+        playerStats = GetComponent<PlayerStats>();
 
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -53,6 +58,39 @@ public class PlayerController : MonoBehaviour
     {
         HandleMouseLook();
         HandleMovement();
+        HandleCombat();
+        HandleInteraction();
+    }
+
+    private void HandleCombat()
+    {
+        if (weaponManager == null) return;
+
+        if (GetFireHeld() && weaponManager.ActiveWeapon != null)
+        {
+            Vector3 origin = playerCamera.transform.position;
+            Vector3 direction = playerCamera.transform.forward;
+            weaponManager.Fire(origin, direction);
+        }
+
+        if (GetReloadDown())
+            weaponManager.Reload();
+
+        float scroll = GetScrollDelta();
+        if (scroll > 0f)
+            weaponManager.SwitchNext();
+        else if (scroll < 0f)
+        {
+            int prev = weaponManager.ActiveSlot - 1;
+            if (prev < 0) prev = 2;
+            weaponManager.SwitchToSlot(prev);
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (GetSlotKeyDown(i))
+                weaponManager.SwitchToSlot(i);
+        }
     }
 
     private Vector2 GetMoveInput()
@@ -86,11 +124,45 @@ public class PlayerController : MonoBehaviour
         return Input.GetButtonDown("Jump");
     }
 
+    private bool GetFireHeld()
+    {
+        if (Mouse.current != null)
+            return Mouse.current.leftButton.isPressed;
+        return Input.GetButton("Fire1");
+    }
+
+    private bool GetReloadDown()
+    {
+        if (Keyboard.current != null)
+            return Keyboard.current.rKey.wasPressedThisFrame;
+        return Input.GetKeyDown(KeyCode.R);
+    }
+
+    private float GetScrollDelta()
+    {
+        if (Mouse.current != null)
+            return Mouse.current.scroll.ReadValue().y;
+        return Input.GetAxis("Mouse ScrollWheel");
+    }
+
+    private bool GetSlotKeyDown(int slot)
+    {
+        if (Keyboard.current == null) return false;
+        return slot switch
+        {
+            0 => Keyboard.current.digit1Key.wasPressedThisFrame,
+            1 => Keyboard.current.digit2Key.wasPressedThisFrame,
+            2 => Keyboard.current.digit3Key.wasPressedThisFrame,
+            _ => false
+        };
+    }
+
     private void HandleMouseLook()
     {
         Vector2 mouseDelta = GetMouseDelta();
-        float mouseX = mouseDelta.x * lookSensitivity;
-        float mouseY = mouseDelta.y * lookSensitivity;
+        float sens = SettingsManager.mouseSensitivity;
+        float mouseX = mouseDelta.x * sens;
+        float mouseY = mouseDelta.y * sens;
 
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
@@ -103,8 +175,9 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = GetMoveInput();
 
+        float speed = playerStats != null ? playerStats.MoveSpeed : moveSpeed;
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
-        controller.Move(move * moveSpeed * Time.deltaTime);
+        controller.Move(move * speed * Time.deltaTime);
 
         if (controller.isGrounded && velocity.y < 0)
             velocity.y = -2f;
@@ -114,5 +187,34 @@ public class PlayerController : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+    }
+
+    private bool GetInteractDown()
+    {
+        if (Keyboard.current != null)
+            return Keyboard.current.eKey.wasPressedThisFrame;
+        return Input.GetKeyDown(KeyCode.E);
+    }
+
+    private void HandleInteraction()
+    {
+        if (!GetInteractDown()) return;
+
+        var interactable = GetComponentInChildren<Interactable>();
+        if (interactable != null && interactable.playerInRange)
+        {
+            interactable.OnInteract(gameObject);
+            return;
+        }
+
+        Interactable[] all = FindObjectsByType<Interactable>(FindObjectsSortMode.None);
+        foreach (var i in all)
+        {
+            if (i.playerInRange)
+            {
+                i.OnInteract(gameObject);
+                return;
+            }
+        }
     }
 }

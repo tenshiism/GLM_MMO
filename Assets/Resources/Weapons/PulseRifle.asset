@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c09f1e216c96d84489040f2769b35790, type: 3}
+  m_Name: PulseRifle
+  m_EditorClassIdentifier: 
+  weaponName: Pulse Rifle
+  weaponPrefab: {fileID: 7202678090475604617, guid: 2a44e2fcd732c824999cadf8ba20559b, type: 3}
+  icon: {fileID: 0}
+  damage: 15
+  fireRate: 8
+  range: 50
+  magazineSize: 30
+  reloadTime: 2
+  maxModSlots: 3
+  spread: 0.5
+  recoilAmount: 1
+  fireType: 1
+  slot: 0
