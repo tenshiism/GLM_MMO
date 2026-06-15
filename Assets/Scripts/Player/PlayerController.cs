@@ -73,6 +73,13 @@ public class PlayerController : MonoBehaviour
             weaponManager.Fire(origin, direction);
         }
 
+        if (GetFireReleased() && weaponManager.ActiveWeapon != null && weaponManager.ActiveWeapon.definition != null && weaponManager.ActiveWeapon.definition.fireType == WeaponFireType.Charge)
+        {
+            Vector3 origin = playerCamera.transform.position;
+            Vector3 direction = playerCamera.transform.forward;
+            weaponManager.ActiveWeapon.ReleaseCharge(origin, direction, weaponManager.hitMask);
+        }
+
         if (GetReloadDown())
             weaponManager.Reload();
 
@@ -129,6 +136,13 @@ public class PlayerController : MonoBehaviour
         if (Mouse.current != null)
             return Mouse.current.leftButton.isPressed;
         return Input.GetButton("Fire1");
+    }
+
+    private bool GetFireReleased()
+    {
+        if (Mouse.current != null)
+            return Mouse.current.leftButton.wasReleasedThisFrame;
+        return Input.GetButtonUp("Fire1");
     }
 
     private bool GetReloadDown()

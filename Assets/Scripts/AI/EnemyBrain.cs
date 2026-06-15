@@ -315,5 +315,8 @@ public class EnemyBrain : MonoBehaviour
         var level = target.GetComponent<CharacterLevel>();
         if (level != null)
             level.AddXP(xpReward);
+
+        if (QuestManager.Instance != null)
+            QuestManager.Instance.AddKill(gameObject.name);
     }
 }

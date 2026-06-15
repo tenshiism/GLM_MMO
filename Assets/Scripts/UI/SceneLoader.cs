@@ -18,6 +18,11 @@ public static class SceneLoader
         SceneManager.LoadScene("MainMenu");
     }
 
+    public static void LoadHub()
+    {
+        SceneManager.LoadScene("HubZone");
+    }
+
     public static void LoadHuntingGround()
     {
         SceneManager.LoadScene("SampleScene");

@@ -10,14 +10,20 @@ public class WeaponBase : MonoBehaviour
     public int currentAmmo;
     public List<WeaponModDefinition> equippedMods = new List<WeaponModDefinition>();
 
+    [Header("Charge (Bow)")]
+    public float chargeTime;
+    public float maxChargeMultiplier = 2f;
+
     private float fireCooldown;
     private bool isReloading;
     private float reloadTimer;
 
     public bool CanFire => currentAmmo > 0 && fireCooldown <= 0f && !isReloading;
     public bool IsReloading => isReloading;
+    public bool IsCharging { get; private set; }
     public int MaxAmmo => definition != null ? definition.magazineSize : 0;
     public float ReloadProgress => isReloading ? 1f - (reloadTimer / definition.reloadTime) : 1f;
+    public float ChargeProgress => IsCharging ? Mathf.Clamp01(chargeTime / 1.5f) : 0f;
 
     private void Start()
     {
@@ -29,6 +35,11 @@ public class WeaponBase : MonoBehaviour
     {
         if (fireCooldown > 0f)
             fireCooldown -= Time.deltaTime;
+
+        if (definition != null && definition.fireType == WeaponFireType.Charge && IsCharging)
+        {
+            chargeTime += Time.deltaTime;
+        }
 
         if (isReloading)
         {
@@ -43,7 +54,17 @@ public class WeaponBase : MonoBehaviour
 
     public virtual void Fire(Vector3 origin, Vector3 direction, LayerMask hitMask)
     {
-        if (!CanFire || definition == null) return;
+        if (definition == null) return;
+
+        if (definition.fireType == WeaponFireType.Charge)
+        {
+            if (!CanFire) return;
+            IsCharging = true;
+            chargeTime = 0f;
+            return;
+        }
+
+        if (!CanFire) return;
 
         fireCooldown = 1f / definition.fireRate;
         currentAmmo--;
@@ -67,6 +88,41 @@ public class WeaponBase : MonoBehaviour
         }
 
         if (Physics.Raycast(origin, spreadDir, out RaycastHit hit, totalRange, hitMask))
+        {
+            var hittable = hit.collider.GetComponent<IHittable>();
+            if (hittable != null)
+            {
+                hittable.TakeDamage(totalDamage);
+                hittable.OnHit(hit.point, hit.normal);
+            }
+        }
+    }
+
+    public void ReleaseCharge(Vector3 origin, Vector3 direction, LayerMask hitMask)
+    {
+        if (!IsCharging) return;
+        FireCharged(origin, direction, hitMask);
+    }
+
+    private void FireCharged(Vector3 origin, Vector3 direction, LayerMask hitMask)
+    {
+        IsCharging = false;
+        if (!CanFire) return;
+
+        fireCooldown = 1f / definition.fireRate;
+        currentAmmo--;
+
+        float chargeRatio = Mathf.Clamp01(chargeTime / 1.5f);
+        float totalDamage = definition.damage * (1f + (maxChargeMultiplier - 1f) * chargeRatio);
+        float totalRange = definition.range;
+
+        foreach (var mod in equippedMods)
+        {
+            if (mod == null) continue;
+            totalDamage += mod.damageBonus;
+        }
+
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, totalRange, hitMask))
         {
             var hittable = hit.collider.GetComponent<IHittable>();
             if (hittable != null)
